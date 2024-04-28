@@ -1,3 +1,4 @@
+import { retrieveContent } from '../filters/retrieveContent';
 import { vagaEncerrada } from '../responses/messages';
 import { PutHashtagsResponse, RetrieveContentResponse } from '../types/shared-interfaces';
 
@@ -41,9 +42,7 @@ export const formatJob = (putHashtagsResponse: PutHashtagsResponse): string => {
   return job.join('\n');
 };
 
-export const resultsEqual = (
-  results: RetrieveContentResponse[],
-): RetrieveContentResponse | undefined => {
+export const resultsEqual = (results: RetrieveContentResponse[]): RetrieveContentResponse => {
   const firstResult = results[0];
   results.shift();
   for (const e of results) {
@@ -51,6 +50,7 @@ export const resultsEqual = (
       return e;
     }
   }
+  return firstResult;
 };
 
 export const removeQueryString = (url: string, keepfirstQueryParam: boolean = false) => {
@@ -63,4 +63,27 @@ export const removeQueryString = (url: string, keepfirstQueryParam: boolean = fa
 
 export const isRetrieveContentResponse = (obj: any): obj is RetrieveContentResponse => {
   return Boolean(obj?.jobTitle && obj?.body);
+};
+
+export const sanitizeUrlAndReturnContent = async (
+  url: string,
+): Promise<RetrieveContentResponse | undefined> => {
+  const sanitizedUrl = removeQueryString(url);
+  const sanitizedUrlWithFirstParam = removeQueryString(url, true);
+
+  const resultFromOriginalUrl = await retrieveContent(url).catch(() => undefined);
+  const resultFromSanitizedUrlWithFirstParam =
+    url !== sanitizedUrlWithFirstParam &&
+    (await retrieveContent(sanitizedUrlWithFirstParam).catch(() => undefined));
+  const resultFromSanitizedUrl =
+    sanitizedUrlWithFirstParam !== sanitizedUrl &&
+    (await retrieveContent(sanitizedUrl).catch(() => undefined));
+
+  const results: RetrieveContentResponse[] = [
+    resultFromOriginalUrl,
+    resultFromSanitizedUrlWithFirstParam,
+    resultFromSanitizedUrl,
+  ].filter(isRetrieveContentResponse);
+
+  return resultsEqual(results) || undefined;
 };

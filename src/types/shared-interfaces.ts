@@ -10,6 +10,7 @@ export interface PutHashtagsResponse {
 }
 
 export interface RetrieveContentResponse {
+  jobUrl: string;
   jobTitle: string;
   body: string;
 }

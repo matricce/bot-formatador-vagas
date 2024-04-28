@@ -4,9 +4,10 @@ import { RetrieveContentResponse } from '../types/shared-interfaces';
 
 export const retrieveContent = async (url: string): Promise<RetrieveContentResponse> => {
   url = url.startsWith('https://') ? url : 'https://' + url;
-  const response = await axios.get(url);
+  const response = await axios.get(url).catch(() => ({ data: '' }));
   const $ = cheerio.load(response.data);
   const jobTitle = $('title').html() || '';
   const body = $('body').html() || '';
-  return { jobTitle, body };
+
+  return { jobUrl: url, jobTitle, body };
 };

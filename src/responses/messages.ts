@@ -151,7 +151,7 @@ Desktop e Celular:
 `;
 
 export const erroUrl =
-  'Opa, não consegui ler essa vaga. 😥\n Tenta me enviar o conteúdo da vaga (copia e cola aqui) SEM O LINK.';
+  'Opa, não consegui ler essa vaga. 😥\nTenta me enviar o conteúdo da vaga (copia e cola aqui) SEM O LINK.';
 
 export const vagaEncerrada =
   'Esta vaga encontra-se encerrada. Se possível, verifique o link acessando a página. 😄';
