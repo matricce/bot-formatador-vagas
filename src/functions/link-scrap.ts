@@ -3,6 +3,7 @@ import { MessageEntity } from 'grammy/types';
 import { putHashtags } from '../filters/hashtags';
 import { erroUrl } from '../responses/messages';
 import { formatJob, sanitizeUrlAndReturnContent } from '../utils/helpers';
+import { RetrieveContentResponse } from 'src/types/shared-interfaces';
 
 export const checkLink = async (ctx: Context) => {
   const message =
@@ -14,7 +15,12 @@ export const checkLink = async (ctx: Context) => {
     ctx.update?.message?.text ||
     '';
 
-  const content = await sanitizeUrlAndReturnContent(message);
+  const content = await Promise.race([
+    sanitizeUrlAndReturnContent(message),
+    new Promise<RetrieveContentResponse | undefined>(resolve =>
+      setTimeout(() => resolve(undefined), 9000),
+    ),
+  ]);
 
   if (typeof content !== 'string') {
     const jobTitle = `\n${content?.jobTitle || 'JOB_TITLE'}`;
