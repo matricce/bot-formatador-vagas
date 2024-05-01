@@ -8,9 +8,14 @@ import { RetrieveContentResponse } from 'src/types/shared-interfaces';
 export const checkLink = async (ctx: Context) => {
   const message =
     String(
-      ctx.update?.message?.entities?.map(
-        (e: MessageEntity) => (<MessageEntity.TextLinkMessageEntity>e)?.url,
-      ),
+      ctx.update?.message?.entities
+        ?.map(
+          (e: MessageEntity) =>
+            (e.type === 'url' && ctx.update?.message?.text?.slice(e.offset, e.offset + e.length)) ||
+            (e.type === 'text_link' && e.url) ||
+            '',
+        )
+        .filter(Boolean)[0],
     ) ||
     ctx.update?.message?.text ||
     '';
