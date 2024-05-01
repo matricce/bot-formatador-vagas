@@ -10,6 +10,8 @@ bot.on(['::url', '::text_link'], checkLink);
 
 bot.on(':text', checkText);
 
+bot.catch((e: Error) => console.error(e));
+
 process.env.NODE_ENV === 'development' && development(bot);
 
 export {};
