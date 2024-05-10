@@ -53,7 +53,7 @@ export const retrieveContent = async (url: string): Promise<RetrieveContentRespo
   const jobObjectTitle = jobObjectData?.title;
   const jobObjectBody = jobObjectData?.description;
   const jobTitle = $('title').html() || jobObjectTitle || '';
-  const body = `${jobTitle}\n${$('body').html() || jobObjectBody || ''}`;
+  const body = $('body').html() || jobObjectBody || '';
 
   return { jobUrl: url, jobTitle, body };
 };

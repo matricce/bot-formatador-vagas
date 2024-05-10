@@ -30,8 +30,9 @@ export const checkLink = async (ctx: Context) => {
   if (typeof content !== 'string') {
     const jobTitle = `\n${content?.jobTitle || 'JOB_TITLE'}`;
     const jobUrl = `\n🔗 ${content?.jobUrl || message || 'JOB_URL'}`;
+    const jobBody = content?.body || '';
     const answer = formatJob({
-      ...(await putHashtags(content?.body || '')),
+      ...(await putHashtags(`${jobTitle}\n${jobBody}`)),
       jobUrl,
       jobTitle,
     });
