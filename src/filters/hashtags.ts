@@ -4,7 +4,7 @@ import { jobLevelTerms } from './terms/jobLevelTerms';
 import { jobLocalTerms } from './terms/jobLocalTerms';
 import { jobOpportunityTerms } from './terms/jobOpportunityTerms';
 
-const vagaGupyEncerrada = (text: string) => /(?<!")Fazer login como candidato/gi.test(text);
+const vagaGupyEncerrada = (text: string) => /button label="Candidaturas encerradas"/gi.test(text);
 
 const getLimitDateIfExists = (text: string) => {
   const limitDate = text.match(/inscrições até(?: o dia)? (\d+\/\d+(\/\d{2,4})?)/gi);
