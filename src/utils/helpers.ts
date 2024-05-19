@@ -7,6 +7,8 @@ import { cleanUrl } from 'tracking-params';
 import bot from '../bot';
 import { mainMenu } from '../menus/mainMenu';
 import { format, screenshot } from '../functions';
+import { serialiseWith } from '@telegraf/entity';
+import { Markdown, None } from './toMarkdownHelper';
 
 export const searchTerms = (terms: Object, body: string): string[] => {
   const optionsArray = Object.keys(terms);
@@ -168,4 +170,12 @@ export const processMenuResponse = async (ctx: Context) => {
     ? await command[data || '']?.(ctx)
     : await command.default(ctx);
   return ctx.answerCallbackQuery().catch(() => '');
+};
+
+export const toMarkdown = (ctx: Context): string | undefined => {
+  if (ctx.msg?.reply_to_message) {
+    const markdown = serialiseWith(Markdown, None)(ctx.msg.reply_to_message);
+    ctx.reply(markdown, { link_preview_options: { is_disabled: true } }).catch(console.error);
+  }
+  return;
 };

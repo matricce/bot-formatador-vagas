@@ -11,6 +11,7 @@ import {
   vaga,
   voluntariado,
 } from './text-only/index';
+import { toMarkdown } from '../utils';
 
 const composer = new Composer();
 
@@ -33,5 +34,7 @@ composer.command('dica', dica);
 composer.command('diversidade', diversidade);
 
 composer.command('formatar', formatar);
+
+composer.command('md', toMarkdown);
 
 export default composer;

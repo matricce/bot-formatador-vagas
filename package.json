@@ -22,6 +22,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.11.1",
     "@sparticuz/chromium": "^123.0.1",
+    "@telegraf/entity": "^0.5.0",
     "@types/he": "^1.2.3",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
