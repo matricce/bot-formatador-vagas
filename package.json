@@ -1,6 +1,6 @@
 {
   "name": "bot-formatador-vagas",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Bot que formata e envia as vagas para os ADMs do grupo Cafeína Vagas postarem.",
   "main": "api/index.ts",
   "scripts": {
@@ -20,10 +20,20 @@
   },
   "homepage": "https://github.com/cafeinabots/bot-formatador-vagas#readme",
   "dependencies": {
+    "@google/generative-ai": "^0.11.1",
+    "@sparticuz/chromium": "^123.0.1",
+    "@types/he": "^1.2.3",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.4.5",
-    "grammy": "^1.22.4"
+    "grammy": "^1.22.4",
+    "he": "^1.2.0",
+    "puppeteer-core": "^22.6.4",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-user-data-dir": "^2.4.1",
+    "puppeteer-extra-plugin-user-preferences": "^2.4.1",
+    "tracking-params": "^0.2.2"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

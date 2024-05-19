@@ -155,3 +155,7 @@ export const erroUrl =
 
 export const vagaEncerrada =
   'Esta vaga encontra-se encerrada. Se possível, verifique o link acessando a página. 😄';
+
+export const erroValidaUrl = 'Opa, você enviou mesmo um link? 😅';
+
+export const unknownCommand = 'Comando inexistente 😥. Contate o desenvolvedor';
