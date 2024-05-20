@@ -134,7 +134,7 @@ export const processLink = async (ctx: Context) => {
       .editMessageText(
         sentMessage.chat.id,
         sentMessage.message_id,
-        [url, newUrl].filter(Boolean).join('\n'),
+        [...new Set([url, newUrl].filter(Boolean))].join('\n'),
         { link_preview_options: { is_disabled: true } },
       )
       .catch(console.error);
