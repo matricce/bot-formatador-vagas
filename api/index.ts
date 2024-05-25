@@ -16,6 +16,11 @@ function runMiddleware(req, res, fn) {
 }
 
 async function handler(req, res) {
+  if (!req.url.startsWith('/api/index')) {
+    return res.json({
+      homepage: `https://github.com/${process.env.VERCEL_GIT_REPO_OWNER || 'cafeinabots'}/${process.env.VERCEL_GIT_REPO_SLUG || ''}`,
+    });
+  }
   await runMiddleware(req, res, webhookCallback(bot, 'http'));
 }
 
