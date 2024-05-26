@@ -16,12 +16,21 @@ function runMiddleware(req, res, fn) {
 }
 
 async function handler(req, res) {
+  console.log('handler', req.url, JSON.stringify(req.body, null, 0));
   if (!req.url.startsWith('/api/index')) {
     return res.json({
       homepage: `https://github.com/${process.env.VERCEL_GIT_REPO_OWNER || 'cafeinabots'}/${process.env.VERCEL_GIT_REPO_SLUG || ''}`,
     });
   }
-  await runMiddleware(req, res, webhookCallback(bot, 'http'));
+  await runMiddleware(
+    req,
+    res,
+    webhookCallback(bot, 'http', args =>
+      console.error('Handler timeout error to message', JSON.stringify(args?.body, null, 0)),
+    ),
+  );
+
+  res.status(200).end();
 }
 
 export default handler;
