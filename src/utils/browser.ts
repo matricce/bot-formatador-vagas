@@ -98,7 +98,6 @@ export async function getScreenshot(url: string): Promise<Buffer | undefined> {
 
   async function realHeight(page) {
     const bodyHeight = await page.evaluate(_ => document.body.scrollHeight);
-    console.log(`bodyHeight: ${bodyHeight}`);
     return bodyHeight;
   }
 

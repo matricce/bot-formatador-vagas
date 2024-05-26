@@ -1,11 +1,11 @@
-import { Message, MessageEntity } from 'grammy/types';
+import { InputFile, Message, MessageEntity } from 'grammy/types';
 import { retrieveContent } from '../filters/retrieveContent';
-import { erroValidaUrl, unknownCommand, vagaEncerrada } from '../responses/messages';
+import { erroUrl, unknownCommand, vagaEncerrada } from '../responses/messages';
 import { PutHashtagsResponse, RetrieveContentResponse } from '../types/shared-interfaces';
 import { Context } from 'grammy';
 import { cleanUrl } from 'tracking-params';
 import bot from '../bot';
-import { mainMenu } from '../menus/mainMenu';
+import { formatMenu } from '../menus/mainMenu';
 import { format, screenshot } from '../functions';
 import { serialiseWith } from '@telegraf/entity';
 import { Markdown, None } from './toMarkdownHelper';
@@ -76,7 +76,7 @@ export const isRetrieveContentResponse = (obj: any): obj is RetrieveContentRespo
 
 export const sanitizeUrlAndReturnContent = async (
   url: string,
-): Promise<RetrieveContentResponse | undefined> => {
+): Promise<RetrieveContentResponse> => {
   /*METRIC*/ const startTime = performance.now();
   const sanitizedUrl = removeQueryString(url);
   const sanitizedUrlWithFirstParam = removeQueryString(url, true);
@@ -96,7 +96,10 @@ export const sanitizeUrlAndReturnContent = async (
   ].filter(isRetrieveContentResponse);
   /*METRIC*/ const endTime = performance.now();
   /*METRIC*/ console.log(`METRIC: sanitizeUrlAndReturnContent, time ${endTime - startTime} ms`);
-  return resultsEqual(results) || undefined;
+  if (results.length === 0) {
+    throw new Error('No results found');
+  }
+  return resultsEqual(results);
 };
 
 export const getUrlFromMessage = (message: Message): string | undefined => {
@@ -117,42 +120,39 @@ export const getUrlFromMessage = (message: Message): string | undefined => {
 export const processLink = async (ctx: Context) => {
   console.log(`processLink`);
   const url = ctx.update.message && getUrlFromMessage(ctx.update.message);
-  const sentMessage = url && (await ctx.reply(url));
+  if (!url) {
+    return ctx.reply(erroUrl, { reply_to_message_id: ctx.msg?.message_id });
+  }
+  const sentMessage = await ctx.replyWithDocument(new InputFile(Buffer.from(' '), 'carregando'), {
+    caption: 'Se levar mais que 15 segundos, tente novamente',
+  });
 
-  const clearedUrl: string | undefined = url && removeTrackingParams(url);
+  const clearedUrl: string = removeTrackingParams(url);
   if (!sentMessage) {
     return;
   }
+
+  const content: RetrieveContentResponse | undefined | string = await Promise.race([
+    sanitizeUrlAndReturnContent(clearedUrl),
+    new Promise<RetrieveContentResponse | undefined>((res, rej) =>
+      setTimeout(() => rej('Tempo esgotado ao processar a url'), 9800),
+    ),
+  ]).catch(err => `Erro ao processar o link "${url}": ${err}`);
+
+  if (!content || typeof content === 'string') {
+    return ctx
+      .reply(content || erroUrl, { reply_to_message_id: ctx.msg?.message_id })
+      .catch(console.error);
+  }
+
+  await bot.api.editMessageMedia(sentMessage.chat.id, sentMessage.message_id, {
+    type: 'document',
+    media: new InputFile(Buffer.from(JSON.stringify(content)), 'job_data.json'),
+    caption: `${content.jobUrl}`,
+  });
+  await formatMenu(sentMessage);
   if (ctx.chat?.id && ctx.msg?.message_id) {
     await bot.api.deleteMessage(ctx.chat.id, ctx.msg?.message_id).catch(() => {});
-  }
-  const hasParams =
-    clearedUrl && [...new URL(clearedUrl).searchParams.values()].filter(Boolean).length > 0;
-
-  const editMessage = newUrl =>
-    bot.api
-      .editMessageText(
-        sentMessage.chat.id,
-        sentMessage.message_id,
-        [...new Set([url, newUrl].filter(Boolean))].join('\n'),
-        { link_preview_options: { is_disabled: true } },
-      )
-      .catch(console.error);
-
-  await editMessage(clearedUrl).catch(() => {});
-
-  const sanitizedUrl = hasParams
-    ? (await sanitizeUrlAndReturnContent(clearedUrl).catch(console.error))?.jobUrl
-    : clearedUrl;
-
-  await editMessage(sanitizedUrl).catch(() => {});
-
-  await mainMenu(sentMessage);
-
-  if (!url) {
-    return ctx
-      .reply(erroValidaUrl, { reply_to_message_id: ctx.msg?.message_id })
-      .catch(console.error);
   }
 };
 
@@ -163,6 +163,7 @@ export const processMenuResponse = async (ctx: Context) => {
     screenshot: screenshot,
     format: format,
     format_ia: ctx => format(ctx, true),
+    markdown: toMarkdown,
     default: ctx => ctx.reply(unknownCommand, { reply_to_message_id: ctx.msg?.message_id }),
   };
 
@@ -173,9 +174,21 @@ export const processMenuResponse = async (ctx: Context) => {
 };
 
 export const toMarkdown = (ctx: Context): string | undefined => {
-  if (ctx.msg?.reply_to_message) {
-    const markdown = serialiseWith(Markdown, None)(ctx.msg.reply_to_message);
+  if (ctx.update?.callback_query?.message) {
+    const markdown = serialiseWith(Markdown, None)(ctx.update?.callback_query?.message);
     ctx.reply(markdown, { link_preview_options: { is_disabled: true } }).catch(console.error);
   }
   return;
+};
+
+export const timestampToDate = (timestamp: Date): string => {
+  const padNum = (num: number, length = 2) => num.toString().padStart(length, '0');
+  const year = timestamp.getFullYear();
+  const month = padNum(timestamp.getMonth() + 1);
+  const day = padNum(timestamp.getDate());
+  const hour = padNum(timestamp.getHours());
+  const minute = padNum(timestamp.getMinutes());
+  const second = padNum(timestamp.getSeconds());
+
+  return `${year}-${month}-${day}_${hour}-${minute}-${second}`;
 };
