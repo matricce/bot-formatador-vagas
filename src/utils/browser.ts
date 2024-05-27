@@ -1,4 +1,4 @@
-import { Browser } from 'puppeteer-core';
+import { Browser, Page } from 'puppeteer-core';
 import puppeteer from 'puppeteer-extra';
 import chromium from '@sparticuz/chromium';
 
@@ -57,7 +57,7 @@ export async function getBrowser() {
               args: chromeArgs,
               executablePath: await chromium.executablePath(),
               ignoreHTTPSErrors: true,
-              headless: true,
+              headless: false,
             }),
       });
     } else {
@@ -92,6 +92,25 @@ export async function closeBrowser() {
   /*METRIC*/ console.log(`METRIC: closeBrowser, time ${endTime - startTime} ms`);
 }
 
+export const setPageLanguage = async (page: Page) => {
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'language', {
+      get: function () {
+        return 'pt-BR';
+      },
+    });
+    Object.defineProperty(navigator, 'languages', {
+      get: function () {
+        return ['pt-BR'];
+      },
+    });
+  });
+
+  await page.setExtraHTTPHeaders({
+    'Accept-Language': 'pt-BR',
+  });
+};
+
 export async function getScreenshot(url: string): Promise<Buffer | undefined> {
   const page = await getPage();
   if (!page) return;
@@ -108,6 +127,8 @@ export async function getScreenshot(url: string): Promise<Buffer | undefined> {
 
   const pageRealWidth = (await realWidth(page)) || 800;
   await page.setViewport({ width: pageRealWidth, height: 844 });
+
+  await setPageLanguage(page);
 
   await page.goto(url, {
     waitUntil: ['load', 'domcontentloaded'],

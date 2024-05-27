@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { getPage } from '../utils';
+import { getPage, setPageLanguage } from '../utils';
 
 const withAxios = async (url): Promise<{ title: string; data: string } | undefined> => {
   console.info('withAxios', 'Retrieving content from url:', url);
   /*METRIC*/ const startTime = performance.now();
   const data = await axios
-    .get(url)
+    .get(url, { headers: { 'Accept-Language': 'pt-BR' } })
     .then(res => (res.data.widget ? undefined : res.data))
     .catch(() => undefined);
   data && console.info('withAxios', 'Retrieved content from url', url);
@@ -32,6 +32,8 @@ const withChromium = async (url): Promise<{ title: string; data: string } | unde
     console.log(`Error creating new page: ${page}`);
     return { title: '', data: '' };
   }
+
+  await setPageLanguage(page);
 
   await page
     .goto(url, {
