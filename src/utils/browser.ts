@@ -101,16 +101,30 @@ export async function getScreenshot(url: string): Promise<Buffer | undefined> {
     return bodyHeight;
   }
 
+  async function realWidth(page) {
+    const bodyWidth = await page.evaluate(_ => document.body.scrollWidth);
+    return bodyWidth;
+  }
+
+  const pageRealWidth = (await realWidth(page)) || 800;
+  await page.setViewport({ width: pageRealWidth, height: 844 });
+
   await page.goto(url, {
     waitUntil: ['load', 'domcontentloaded'],
   });
 
-  const pageRealHeight = (await realHeight(page)) || 844;
-  await page.setViewport({ width: 1024, height: pageRealHeight });
-
-  page.evaluate(() => {
+  await page.evaluate(() => {
     (<HTMLElement>document.querySelector('.show-more-less-html__button'))?.click();
+    (<HTMLElement>document.querySelector('section.right-rail'))?.remove();
+    (<HTMLElement>document.querySelector('section.similar-jobs'))?.remove();
+    (<HTMLElement>document.querySelector('div.pre-footer'))?.remove();
+    Array.from(document.querySelectorAll('header')).forEach(e => e?.remove());
+    Array.from(document.querySelectorAll('footer')).forEach(e => e?.remove());
   });
+
+  const pageRealHeight = (await realHeight(page)) || 844;
+  await page.setViewport({ width: pageRealWidth, height: pageRealHeight });
+  console.log('pageRealWidth', pageRealWidth, 'pageRealHeight', pageRealHeight);
 
   await page.screenshot({
     type: 'png',
