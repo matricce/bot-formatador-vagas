@@ -1,10 +1,10 @@
+import axios from 'axios';
 import { Context } from 'grammy';
 import { putHashtags } from '../filters/hashtags';
+import { postMenu } from '../menus/mainMenu';
 import { erroUrl } from '../responses/messages';
 import { formatJob, isRetrieveContentResponse } from '../utils/helpers';
 import { getGeminiResponse, preProcessDescription } from './ia';
-import axios from 'axios';
-import { postMenu } from '../menus/mainMenu';
 
 export const format = async (ctx: Context, withIA = false) => {
   /*METRIC*/ const startTime = performance.now();

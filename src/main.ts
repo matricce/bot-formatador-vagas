@@ -2,8 +2,8 @@ import 'dotenv/config';
 import bot from './bot';
 import commands from './commands/composer';
 import { checkText } from './functions';
-import { development } from './utils/start';
 import { processLink, processMenuResponse } from './utils';
+import { development } from './utils/start';
 
 bot.use(commands);
 

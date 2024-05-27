@@ -1,5 +1,4 @@
-import { Node } from '@telegraf/entity/types/types';
-import { Escaper } from '@telegraf/entity/types/types';
+import { Escaper, Node } from '@telegraf/entity/types/types';
 
 export function Markdown(match: string, node?: Node): string {
   switch (node?.type || 'monospace') {

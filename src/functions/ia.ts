@@ -100,4 +100,4 @@ const getGeminiResponse = async (message: string): Promise<string> => {
   );
 };
 
-export { preProcessDescription, getGeminiResponse };
+export { getGeminiResponse, preProcessDescription };

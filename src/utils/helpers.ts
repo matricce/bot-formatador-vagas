@@ -1,13 +1,13 @@
-import { InputFile, Message, MessageEntity } from 'grammy/types';
-import { retrieveContent } from '../filters/retrieveContent';
-import { erroUrl, unknownCommand, vagaEncerrada } from '../responses/messages';
-import { PutHashtagsResponse, RetrieveContentResponse } from '../types/shared-interfaces';
+import { serialiseWith } from '@telegraf/entity';
 import { Context } from 'grammy';
+import { InputFile, Message, MessageEntity } from 'grammy/types';
 import { cleanUrl } from 'tracking-params';
 import bot from '../bot';
-import { formatMenu } from '../menus/mainMenu';
+import { retrieveContent } from '../filters/retrieveContent';
 import { format, screenshot } from '../functions';
-import { serialiseWith } from '@telegraf/entity';
+import { formatMenu } from '../menus/mainMenu';
+import { erroUrl, unknownCommand, vagaEncerrada } from '../responses/messages';
+import { PutHashtagsResponse, RetrieveContentResponse } from '../types/shared-interfaces';
 import { Markdown, None } from './toMarkdownHelper';
 
 export const searchTerms = (terms: Object, body: string): string[] => {

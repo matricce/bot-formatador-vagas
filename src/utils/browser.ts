@@ -1,6 +1,6 @@
+import chromium from '@sparticuz/chromium';
 import { Browser, Page } from 'puppeteer-core';
 import puppeteer from 'puppeteer-extra';
-import chromium from '@sparticuz/chromium';
 
 require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
 require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
