@@ -141,6 +141,9 @@ export async function getScreenshot(url: string): Promise<Buffer | undefined> {
     (<HTMLElement>document.querySelector('div.pre-footer'))?.remove();
     Array.from(document.querySelectorAll('header')).forEach(e => e?.remove());
     Array.from(document.querySelectorAll('footer')).forEach(e => e?.remove());
+
+    (<HTMLElement>document.querySelector('div[role="dialog"]'))?.remove();
+    (<HTMLElement>document.querySelector('div[data-state="open"]'))?.remove();
   });
 
   const pageRealHeight = (await realHeight(page)) || 844;
