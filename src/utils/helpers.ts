@@ -2,6 +2,7 @@ import { serialiseWith } from '@telegraf/entity';
 import { Context } from 'grammy';
 import { InputFile, Message, MessageEntity } from 'grammy/types';
 import { cleanUrl } from 'tracking-params';
+import zlib from 'zlib';
 import bot from '../bot';
 import { retrieveContent } from '../filters/retrieveContent';
 import { format, screenshot } from '../functions';
@@ -145,9 +146,11 @@ export const processLink = async (ctx: Context) => {
       .catch(console.error);
   }
 
+  const json = JSON.stringify(content, null, 0);
+
   await bot.api.editMessageMedia(sentMessage.chat.id, sentMessage.message_id, {
     type: 'document',
-    media: new InputFile(Buffer.from(JSON.stringify(content)), 'job_data.json'),
+    media: new InputFile(zlib.deflateSync(json), 'job_data'),
     caption: `${content.jobUrl}`,
   });
   await formatMenu(sentMessage);

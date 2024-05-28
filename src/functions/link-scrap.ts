@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Context } from 'grammy';
+import zlib from 'zlib';
 import { putHashtags } from '../filters/hashtags';
 import { postMenu } from '../menus/mainMenu';
 import { erroUrl } from '../responses/messages';
@@ -14,8 +15,9 @@ export const format = async (ctx: Context, withIA = false) => {
 
   const downloadFile = async file_url => {
     const fileContent = await axios
-      .get(file_url)
-      .then(res => res.data)
+      .get(file_url, { responseType: 'arraybuffer' })
+      .then(res => zlib.inflateSync(res.data).toString())
+      .then(JSON.parse)
       .catch(() => undefined);
 
     return fileContent;
