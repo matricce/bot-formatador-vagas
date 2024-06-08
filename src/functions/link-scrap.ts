@@ -43,12 +43,9 @@ export const format = async (ctx: Context, withIA = false) => {
     const jobDescription: string =
       !withIA || putHashtagsResponse.encerrada
         ? ''
-        : (await Promise.race([
-            getGeminiResponse(await preProcessDescription(jobBody)),
-            new Promise<undefined>((res, rej) =>
-              setTimeout(() => rej('Tempo esgotado ao processar a descrição'), 9800 - timeElapsed),
-            ),
-          ]).catch(async err => console.error(`Erro ao processar a descrição: ${err}`))) || '';
+        : (await getGeminiResponse(await preProcessDescription(jobBody)).catch(async err =>
+            console.error(`Erro ao processar a descrição: ${err}`),
+          )) || '';
     const answer = formatJob({
       ...putHashtagsResponse,
       jobUrl,

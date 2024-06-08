@@ -159,3 +159,5 @@ export const vagaEncerrada =
 export const erroValidaUrl = 'Opa, você enviou mesmo um link? 😅';
 
 export const unknownCommand = 'Comando inexistente 😥. Contate o desenvolvedor';
+
+export const timeoutMessage = '⏰ Tempo esgotado ao processar o pedido. Tente novamente.';

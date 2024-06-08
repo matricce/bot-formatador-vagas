@@ -133,12 +133,9 @@ export const processLink = async (ctx: Context) => {
     return;
   }
 
-  const content: RetrieveContentResponse | undefined | string = await Promise.race([
-    sanitizeUrlAndReturnContent(clearedUrl),
-    new Promise<RetrieveContentResponse | undefined>((res, rej) =>
-      setTimeout(() => rej('Tempo esgotado ao processar a url'), 9800),
-    ),
-  ]).catch(err => `Erro ao processar o link "${url}": ${err}`);
+  const content: RetrieveContentResponse | undefined | string = await sanitizeUrlAndReturnContent(
+    clearedUrl,
+  ).catch(err => `Erro ao processar o link "${url}": ${err}`);
 
   if (!content || typeof content === 'string') {
     return ctx
@@ -194,4 +191,30 @@ export const timestampToDate = (timestamp: Date): string => {
   const second = padNum(timestamp.getSeconds());
 
   return `${year}-${month}-${day}_${hour}-${minute}-${second}`;
+};
+
+export const wait = async ms => new Promise(resolve => setTimeout(resolve, ms));
+
+export const timeoutFallback = async (ctx: Context, cb: Function) => {
+  console.log(`timeoutFallback '${cb.name}'`);
+  const timeoutSetup = {
+    delay: process.env.EXEC_TIMEOUT || 9000,
+    delayStr: (process.env.EXEC_TIMEOUT || '9000')?.replace(/(\d)(\d).*/, '$1.$2'),
+    cancel: false,
+  };
+  const timeout = async () => {
+    await wait(timeoutSetup.delay);
+    if (timeoutSetup.cancel) {
+      return;
+    }
+    await ctx
+      .reply('Tempo esgotado ao processar o pedido.', { reply_to_message_id: ctx.msg?.message_id })
+      .catch(console.error);
+  };
+  const race = await Promise.race([cb(ctx), timeout()]).catch(console.error);
+  timeoutSetup.cancel = true;
+  if (ctx.update.callback_query) {
+    await ctx.answerCallbackQuery().catch(() => '');
+  }
+  return race;
 };

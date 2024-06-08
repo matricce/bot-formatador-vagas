@@ -31,7 +31,6 @@ const isLocal = process.env.NODE_ENV === 'development';
 export async function getBrowser() {
   console.log(`Executing getBrowser`);
   /*METRIC*/ const startTime = performance.now();
-  chromium.setHeadlessMode = true;
   chromium.setGraphicsMode = false;
 
   const chromeArgs = [
@@ -85,7 +84,9 @@ export async function getPage() {
 }
 
 export async function closeBrowser() {
-  console.log(`Executing closeBrowser`);
+  console.log(
+    browser ? `Browser being closed: ${JSON.stringify(browser)}` : 'Browser already closed',
+  );
   /*METRIC*/ const startTime = performance.now();
   await browser?.close();
   /*METRIC*/ const endTime = performance.now();
@@ -111,9 +112,11 @@ export const setPageLanguage = async (page: Page) => {
   });
 };
 
-export async function getScreenshot(url: string): Promise<Buffer | undefined> {
+export async function getScreenshot(url: string): Promise<Buffer> {
   const page = await getPage();
-  if (!page) return;
+  if (!page) {
+    throw new Error('getScreenshot: Error creating new page');
+  }
 
   async function realHeight(page) {
     const bodyHeight = await page.evaluate(_ => document.body.scrollHeight);
