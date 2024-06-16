@@ -25,8 +25,12 @@ async function handler(req, res) {
   await runMiddleware(
     req,
     res,
-    webhookCallback(bot, 'http', args =>
-      console.error('Handler timeout error to message', JSON.stringify(args?.body, null, 0)),
+    webhookCallback(
+      bot,
+      'http',
+      args =>
+        console.error('Handler timeout error to message', JSON.stringify(args?.body, null, 0)),
+      60000,
     ),
   );
 

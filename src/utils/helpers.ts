@@ -124,9 +124,7 @@ export const processLink = async (ctx: Context) => {
   if (!url) {
     return ctx.reply(erroUrl, { reply_to_message_id: ctx.msg?.message_id });
   }
-  const sentMessage = await ctx.replyWithDocument(new InputFile(Buffer.from(' '), 'carregando'), {
-    caption: 'Se levar mais que 15 segundos, tente novamente',
-  });
+  const sentMessage = await ctx.replyWithDocument(new InputFile(Buffer.from(' '), 'carregando'));
 
   const clearedUrl: string = removeTrackingParams(url);
   if (!sentMessage) {
@@ -198,8 +196,8 @@ export const wait = async ms => new Promise(resolve => setTimeout(resolve, ms));
 export const timeoutFallback = async (ctx: Context, cb: Function) => {
   console.log(`timeoutFallback '${cb.name}'`);
   const timeoutSetup = {
-    delay: process.env.EXEC_TIMEOUT || 9000,
-    delayStr: (process.env.EXEC_TIMEOUT || '9000')?.replace(/(\d)(\d).*/, '$1.$2'),
+    delay: process.env.EXEC_TIMEOUT || 59000,
+    delayStr: (process.env.EXEC_TIMEOUT || '59000')?.replace(/(\d)(\d).*/, '$1.$2'),
     cancel: false,
   };
   const timeout = async () => {
