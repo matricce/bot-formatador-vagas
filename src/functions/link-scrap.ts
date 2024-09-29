@@ -34,33 +34,59 @@ export const format = async (ctx: Context, withIA = false) => {
     `METRIC: format, before format, url ${message}, time ${performance.now() - startTime} ms`,
   );
   if (content) {
-    const jobTitle = `\n${content?.jobTitle || 'JOB_TITLE'}`;
-    const jobUrl = `\n🔗 ${content?.jobUrl || message || 'JOB_URL'}`;
+    const job = {
+      url: content?.jobUrl || message || 'JOB_URL',
+      title: content?.jobTitle || 'JOB_TITLE',
+      description: 'JOB_DESCRIPTION',
+      descriptionByAI: '',
+      confidence: 0,
+      reason: '',
+      opinion: '',
+      sentiment: '',
+    };
     const jobBody = content?.body || '';
-    const putHashtagsResponse = await putHashtags(`${jobTitle}\n${jobBody}`);
+    const putHashtagsResponse = await putHashtags(`${job.title}\n${jobBody}`);
     const timeElapsed = performance.now() - startTime;
     console.log(`Time elapsed: ${timeElapsed} ms.`);
-    const jobDescription: string =
-      !withIA || putHashtagsResponse.encerrada
-        ? ''
-        : (await getGeminiResponse(await preProcessDescription(jobBody)).catch(async err =>
-            console.error(`Erro ao processar a descrição: ${err}`),
-          )) || '';
+    if (withIA) {
+      const response = await getGeminiResponse(await preProcessDescription(jobBody)).catch(
+        async err => console.error(`Erro ao processar a descrição: ${err}`),
+      );
+      if (response) {
+        job.title = response.jobTitle || job.title;
+        job.descriptionByAI = response.jobDescription;
+        job.confidence = response.confidence;
+        job.reason = response.reason;
+        job.opinion = response.opinion;
+        job.sentiment = response.sentiment;
+      }
+    }
     const answer = formatJob({
       ...putHashtagsResponse,
-      jobUrl,
-      jobTitle,
-      jobDescription,
+      jobUrl: `\n🔗 ${job.url}`,
+      jobTitle: `\n💻 <b>${job.title}</b>`,
+      jobDescription: `\n${job.confidence ? job.descriptionByAI : job.description}`,
     });
     /*METRIC*/ const endTime = performance.now();
     /*METRIC*/ console.log(
-      `METRIC: format, url ${jobUrl.replace('\n', '')}, time ${endTime - startTime} ms`,
+      `METRIC: format, url ${job.url.replace('\n', '')}, time ${endTime - startTime} ms`,
     );
     const sentMessage = await ctx
       .reply(answer, { parse_mode: 'HTML', reply_to_message_id: ctx.msg?.message_id })
       .catch(() => ctx.reply(erroUrl, { reply_to_message_id: ctx.msg?.message_id }));
     if (sentMessage) {
       await postMenu(sentMessage);
+      if (job.descriptionByAI) {
+        await ctx
+          .reply(
+            `<b>Confiança:</b> ${job.confidence}%\n\n<b>Motivo:</b> ${job.reason}\n\n<b>Opinião:</b> ${job.opinion}\n\n<b>Sentimento:</b> ${job.sentiment}`,
+            {
+              reply_to_message_id: sentMessage.message_id,
+              parse_mode: 'HTML',
+            },
+          )
+          .catch(console.error);
+      }
     }
   }
 };

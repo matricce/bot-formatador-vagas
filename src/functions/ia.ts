@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 import he from 'he';
 
-const MODEL_NAME = 'gemini-1.5-flash-latest';
+const MODEL_NAME = process.env.GEMINI_API_MODEL!;
 const API_KEY = process.env.GEMINI_API_KEY!;
 
 export const isMessageOnlyEmojis = (message: string): Boolean => {
@@ -22,17 +22,9 @@ const systemInstruction = process.env.GEMINI_SYSTEM_INSTRUCTION;
 const preProcessDescription = async (message: string): Promise<string> => {
   /*METRIC*/ const startTime = performance.now();
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const generationConfig = {
-    temperature: 0.15,
-    topK: 1,
-    topP: 1,
-    maxOutputTokens: 2048,
-    responseMimeType: 'text/plain',
-  };
   const model = genAI.getGenerativeModel({
     model: MODEL_NAME,
     systemInstruction,
-    generationConfig,
   });
   const $ = cheerio.load(message);
 
@@ -65,15 +57,55 @@ const preProcessDescription = async (message: string): Promise<string> => {
   return message;
 };
 
-const getGeminiResponse = async (message: string): Promise<string> => {
+const getGeminiResponse = async (
+  message: string,
+): Promise<{
+  jobTitle: string;
+  jobDescription: string;
+  confidence: number;
+  reason: string;
+  opinion: string;
+  sentiment: string;
+}> => {
   /*METRIC*/ const startTime = performance.now();
   const genAI = new GoogleGenerativeAI(API_KEY);
   const generationConfig = {
     temperature: 0.15,
     topK: 1,
     topP: 1,
-    maxOutputTokens: 2048,
-    responseMimeType: 'text/plain',
+    maxOutputTokens: 2500,
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: 'object',
+      properties: {
+        jobTitle: {
+          type: 'string',
+        },
+        jobDescriptionMarkdown: {
+          type: 'string',
+        },
+        confidence: {
+          type: 'number',
+        },
+        reason: {
+          type: 'string',
+        },
+        opinion: {
+          type: 'string',
+        },
+        sentiment: {
+          type: 'string',
+        },
+      },
+      required: [
+        'jobTitle',
+        'jobDescriptionMarkdown',
+        'confidence',
+        'reason',
+        'opinion',
+        'sentiment',
+      ],
+    },
   };
   const model = genAI.getGenerativeModel({
     model: MODEL_NAME,
@@ -89,15 +121,18 @@ const getGeminiResponse = async (message: string): Promise<string> => {
         .catch(console.error)
     : undefined;
 
-  const response = transformHTML(
-    typeof result === 'string' ? result : result?.response?.text() || '',
-  );
+  const jobObject = await Promise.resolve(result?.response?.text() || '')
+    .then(JSON.parse)
+    .catch(() => undefined);
+
+  jobObject.jobDescription = transformHTML(jobObject.jobDescriptionMarkdown || '');
+
+  console.log('jobObject', jobObject);
+  const { jobTitle, jobDescription, confidence, reason, opinion, sentiment } = jobObject;
+
   /*METRIC*/ const endTime = performance.now();
   /*METRIC*/ console.log(`METRIC: processDescription, time ${endTime - startTime} ms`);
-  return (
-    response &&
-    `\n<code>############↓EDITAR↓############</code>\n\n${response}\n\n<code>############↑EDITAR↑############</code>\n`
-  );
+  return { jobTitle, jobDescription, confidence, reason, opinion, sentiment };
 };
 
 export { getGeminiResponse, preProcessDescription };
