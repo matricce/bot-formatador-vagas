@@ -13,7 +13,7 @@ export const isMessageOnlyEmojis = (message: string): Boolean => {
 const transformHTML = (html: string): string => {
   return html
     .replace(/<[\w\s\/"=]+>/g, '')
-    .replace(/(\*\*)([A-zÀ-ÿ\s\d%:?!,\.]+)(\*\*)/g, '<b>$2</b>')
+    .replace(/(\*\*)([A-zÀ-ÿ\s\d%:?!,\.\-/()]+)(\*\*)/g, '<b>$2</b>')
     .replace(/(^\s*)(\*)(\s+)/gm, '$1-$3');
 };
 
