@@ -194,7 +194,10 @@ export const timestampToDate = (timestamp: Date): string => {
 export const wait = async ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export const timeoutFallback = async (ctx: Context, cb: Function) => {
-  console.log(`timeoutFallback '${cb.name}'`);
+  const req_id = ctx.update.callback_query?.id;
+  console.log(
+    `timeoutFallback '${cb.name}[${req_id}]', '${process.env.EXEC_TIMEOUT || 59000}', '${ctx.msg?.message_id}', '${ctx.update.callback_query?.data}'`,
+  );
   const timeoutSetup = {
     delay: process.env.EXEC_TIMEOUT || 59000,
     delayStr: (process.env.EXEC_TIMEOUT || '59000')?.replace(/(\d)(\d).*/, '$1.$2'),
@@ -215,4 +218,12 @@ export const timeoutFallback = async (ctx: Context, cb: Function) => {
     await ctx.answerCallbackQuery().catch(() => '');
   }
   return race;
+};
+
+export const escapeMarkdown = text => {
+  const specialChars = ['_', '*', '`', '[', ']', '(', ')'];
+  specialChars.forEach(char => {
+    text = text.split(char).join(`\\${char}`);
+  });
+  return text;
 };

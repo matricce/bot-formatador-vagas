@@ -4,10 +4,8 @@ import { getPage, setPageLanguage } from '../utils';
 const withAxios = async (url): Promise<{ title: string; data: string } | undefined> => {
   console.info('withAxios', 'Retrieving content from url:', url);
   /*METRIC*/ const startTime = performance.now();
-  const data = await axios
-    .get(url, { headers: { 'Accept-Language': 'pt-BR' } })
-    .then(res => (res.data.widget ? undefined : res.data))
-    .catch(() => undefined);
+  const functionName = url.includes('inhire.app') ? 'inhire' : 'def';
+  const data = await owners[functionName](url).catch(() => undefined);
   data && console.info('withAxios', 'Retrieved content from url', url);
   /*METRIC*/ const endTime = performance.now();
   /*METRIC*/ console.log(`METRIC: withAxios, url ${url}, time ${endTime - startTime} ms`);
@@ -18,6 +16,31 @@ const withAxios = async (url): Promise<{ title: string; data: string } | undefin
     };
   }
   return;
+};
+
+const owners = {
+  inhire: url => inhire(url),
+  def: url => def(url),
+};
+
+const def = async (url): Promise<string | undefined> => {
+  const data = await axios
+    .get(url, { headers: { 'Accept-Language': 'pt-BR' } })
+    .then(res => (res.data.widget ? undefined : res.data))
+    .catch(() => undefined);
+  return data;
+};
+
+const inhire = async (url): Promise<string | undefined> => {
+  const jobUuid = url.match(/[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}/)[0];
+  const tenant = url.match(/(\w+)(\.inhire\.app)/)[1];
+  const apiUrl = `https://api.inhire.app/job-posts/public/pages/${jobUuid}`;
+  const data = await axios
+    .get(apiUrl, { headers: { 'X-Tenant': tenant } })
+    .then(res => res.data)
+    .then(JSON.stringify)
+    .catch(() => undefined);
+  return data;
 };
 
 const withChromium = async (url): Promise<{ title: string; data: string } | undefined> => {

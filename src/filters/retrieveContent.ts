@@ -18,11 +18,11 @@ export const retrieveContent = async (url: string): Promise<RetrieveContentRespo
   const { title, data } = (await withAxios(url)) || (await withChromium(url)) || {};
   const $ = cheerio.load(data || '');
   const jobObject = $('script').attr('type', 'application/ld+json');
-  const jobObjectData = await Promise.resolve((<any>jobObject?.[0]?.children?.[0])?.data)
+  const jobObjectData = await Promise.resolve((<any>jobObject?.[0]?.children?.[0])?.data || data)
     .then(JSON.parse)
     .catch(() => undefined);
 
-  const jobObjectTitle = jobObjectData?.title;
+  const jobObjectTitle = jobObjectData?.title || jobObjectData?.displayName;
   const jobObjectBody = jobObjectData?.description;
   const jobTitle = title || $('title').text() || jobObjectTitle || '';
   const body = jobObjectBody || $('body').html() || '';

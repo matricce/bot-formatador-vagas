@@ -161,3 +161,5 @@ export const erroValidaUrl = 'Opa, você enviou mesmo um link? 😅';
 export const unknownCommand = 'Comando inexistente 😥. Contate o desenvolvedor';
 
 export const timeoutMessage = '⏰ Tempo esgotado ao processar o pedido. Tente novamente.';
+
+export const bigMessage = '😥 A mensagem é muito grande. Enviando como arquivo.';

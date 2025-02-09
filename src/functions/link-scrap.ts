@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { Context } from 'grammy';
+import { Context, InputFile } from 'grammy';
 import zlib from 'zlib';
 import { putHashtags } from '../filters/hashtags';
 import { postMenu } from '../menus/mainMenu';
-import { erroUrl } from '../responses/messages';
-import { formatJob, isRetrieveContentResponse } from '../utils/helpers';
+import { bigMessage, erroUrl } from '../responses/messages';
+import { escapeMarkdown, formatJob, isRetrieveContentResponse } from '../utils/helpers';
 import { getGeminiResponse, preProcessDescription } from './ia';
 
 export const format = async (ctx: Context, withIA = false) => {
@@ -37,7 +37,7 @@ export const format = async (ctx: Context, withIA = false) => {
     const job = {
       url: content?.jobUrl || message || 'JOB_URL',
       title: content?.jobTitle || 'JOB_TITLE',
-      description: 'JOB_DESCRIPTION',
+      description: 'JOB\\_DESCRIPTION',
       descriptionByAI: '',
       confidence: 0,
       reason: '',
@@ -63,8 +63,8 @@ export const format = async (ctx: Context, withIA = false) => {
     }
     const answer = formatJob({
       ...putHashtagsResponse,
-      jobUrl: `\n🔗 ${job.url}`,
-      jobTitle: `\n💻 <b>${job.title}</b>`,
+      jobUrl: `\n🔗 ${escapeMarkdown(job.url)})`,
+      jobTitle: `\n💻 *${escapeMarkdown(job.title)}*`,
       jobDescription: `\n${job.confidence ? job.descriptionByAI : job.description}`,
     });
     /*METRIC*/ const endTime = performance.now();
@@ -72,8 +72,16 @@ export const format = async (ctx: Context, withIA = false) => {
       `METRIC: format, url ${job.url.replace('\n', '')}, time ${endTime - startTime} ms`,
     );
     const sentMessage = await ctx
-      .reply(answer, { parse_mode: 'HTML', reply_to_message_id: ctx.msg?.message_id })
-      .catch(() => ctx.reply(erroUrl, { reply_to_message_id: ctx.msg?.message_id }));
+      .reply(answer, { parse_mode: 'Markdown', reply_to_message_id: ctx.msg?.message_id })
+      .catch(async err => {
+        console.error(err);
+        await ctx.reply(`${bigMessage}\nErro: ${err}`, {
+          reply_to_message_id: ctx.msg?.message_id,
+        });
+        await ctx.replyWithDocument(new InputFile(Buffer.from(answer), 'vaga.md'), {
+          reply_to_message_id: ctx.msg?.message_id,
+        });
+      });
     if (sentMessage) {
       await postMenu(sentMessage);
       if (job.descriptionByAI) {

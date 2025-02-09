@@ -10,10 +10,10 @@ export const isMessageOnlyEmojis = (message: string): Boolean => {
   return regex.test(message.trim());
 };
 
-const transformHTML = (html: string): string => {
+const transformMarkdown = (html: string): string => {
   return html
     .replace(/<[\w\s\/"=]+>/g, '')
-    .replace(/(\*\*)([A-zÀ-ÿ\s\d%:?!,\.\-/()]+)(\*\*)/g, '<b>$2</b>')
+    .replace(/(\*\*)([A-zÀ-ÿ\s\d%:?!,\.\-/()]+)(\*\*)/g, '*$2*')
     .replace(/(^\s*)(\*)(\s+)/gm, '$1-$3');
 };
 
@@ -125,7 +125,7 @@ const getGeminiResponse = async (
     .then(JSON.parse)
     .catch(() => undefined);
 
-  jobObject.jobDescription = transformHTML(jobObject.jobDescriptionMarkdown || '');
+  jobObject.jobDescription = transformMarkdown(jobObject.jobDescriptionMarkdown || '');
 
   console.log('jobObject', jobObject);
   const { jobTitle, jobDescription, confidence, reason, opinion, sentiment } = jobObject;

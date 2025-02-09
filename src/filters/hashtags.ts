@@ -16,7 +16,7 @@ export const putHashtags = async (text: string): Promise<PutHashtagsResponse> =>
   const jobLevel = `🧑🏽 ${searchTerms(jobLevelTerms, text).join(' ')}`;
   const jobLocal = `🌎 ${searchTerms(jobLocalTerms, text).join(' ')}`;
   const footer =
-    '☕️ <i>Acompanhe vagas e conteúdos para iniciantes em TI no Telegram da @CafeinaVagas</i>';
+    '☕️ _Acompanhe vagas e conteúdos para iniciantes em TI no Telegram da @CafeinaVagas_';
   const limitDate = getLimitDateIfExists(text);
   const encerrada = vagaGupyEncerrada(text);
 
