@@ -3,6 +3,7 @@ export interface PutHashtagsResponse {
   jobLevel: string;
   jobLocal: string;
   jobTitle?: string;
+  jobDescription?: string;
   jobUrl?: string;
   limitDate: string;
   footer: string;

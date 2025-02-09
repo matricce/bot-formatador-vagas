@@ -5,5 +5,10 @@
       "src": "/.*",
       "dest": "api/index.ts"
     }
-  ]
+  ],
+  "functions": {
+    "api/*": {
+      "maxDuration": 60
+    }
+  }
 }
