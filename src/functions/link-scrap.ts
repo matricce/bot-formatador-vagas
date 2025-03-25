@@ -37,6 +37,11 @@ export const format = async (ctx: Context, withIA = false) => {
     const job = {
       url: content?.jobUrl || message || 'JOB_URL',
       title: content?.jobTitle || 'JOB_TITLE',
+      hashtags: {
+        jobOpportunity: 'JOB\\_OPPORTUNITY',
+        jobLevel: 'JOB\\_LEVEL',
+        jobLocal: 'JOB\\_LOCAL',
+      },
       description: 'JOB\\_DESCRIPTION',
       descriptionByAI: '',
       confidence: 0,
@@ -54,6 +59,11 @@ export const format = async (ctx: Context, withIA = false) => {
       );
       if (response) {
         job.title = response.jobTitle || job.title;
+        job.hashtags = {
+          jobOpportunity: response.jobHashtags.jobOpportunity,
+          jobLevel: response.jobHashtags.jobLevel,
+          jobLocal: response.jobHashtags.jobLocal,
+        };
         job.descriptionByAI = response.jobDescription;
         job.confidence = response.confidence;
         job.reason = response.reason;
@@ -63,6 +73,9 @@ export const format = async (ctx: Context, withIA = false) => {
     }
     const answer = formatJob({
       ...putHashtagsResponse,
+      jobOpportunity: job.hashtags.jobOpportunity,
+      jobLevel: job.hashtags.jobLevel,
+      jobLocal: job.hashtags.jobLocal,
       jobUrl: `\n🔗 ${escapeMarkdown(job.url)})`,
       jobTitle: `\n💻 *${escapeMarkdown(job.title)}*`,
       jobDescription: `\n${job.confidence ? job.descriptionByAI : job.description}`,

@@ -61,6 +61,11 @@ const getGeminiResponse = async (
   message: string,
 ): Promise<{
   jobTitle: string;
+  jobHashtags: {
+    jobOpportunity: string;
+    jobLevel: string;
+    jobLocal: string;
+  };
   jobDescription: string;
   confidence: number;
   reason: string;
@@ -81,6 +86,24 @@ const getGeminiResponse = async (
         jobTitle: {
           type: 'string',
         },
+        jobOpportunity: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        jobLevel: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        jobLocal: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
         jobDescriptionMarkdown: {
           type: 'string',
         },
@@ -99,6 +122,9 @@ const getGeminiResponse = async (
       },
       required: [
         'jobTitle',
+        'jobOpportunity',
+        'jobLevel',
+        'jobLocal',
         'jobDescriptionMarkdown',
         'confidence',
         'reason',
@@ -128,11 +154,27 @@ const getGeminiResponse = async (
   jobObject.jobDescription = transformMarkdown(jobObject.jobDescriptionMarkdown || '');
 
   console.log('jobObject', jobObject);
-  const { jobTitle, jobDescription, confidence, reason, opinion, sentiment } = jobObject;
+  const {
+    jobTitle,
+    jobOpportunity,
+    jobLevel,
+    jobLocal,
+    jobDescription,
+    confidence,
+    reason,
+    opinion,
+    sentiment,
+  } = jobObject;
+
+  const jobHashtags = {
+    jobOpportunity: `💻 ${jobOpportunity.map(item => `#${item}`).join(' ')}`,
+    jobLevel: `🧑🏽 ${jobLevel.map(item => `#${item}`).join(' ')}`,
+    jobLocal: `🌎 ${jobLocal.map(item => `#${item}`).join(' ')}`,
+  };
 
   /*METRIC*/ const endTime = performance.now();
   /*METRIC*/ console.log(`METRIC: processDescription, time ${endTime - startTime} ms`);
-  return { jobTitle, jobDescription, confidence, reason, opinion, sentiment };
+  return { jobTitle, jobHashtags, jobDescription, confidence, reason, opinion, sentiment };
 };
 
 export { getGeminiResponse, preProcessDescription };
