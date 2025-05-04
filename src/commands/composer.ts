@@ -2,6 +2,7 @@ import { Composer } from 'grammy';
 import {
   ajuda,
   artigo,
+  concurso,
   curso,
   dica,
   diversidade,
@@ -31,6 +32,8 @@ composer.command('artigo', artigo);
 composer.command('dica', dica);
 
 composer.command('diversidade', diversidade);
+
+composer.command('concurso', concurso);
 
 composer.command('formatar', formatar);
 

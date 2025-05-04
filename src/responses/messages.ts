@@ -109,6 +109,24 @@ Repositório com objetivo de capacitar alunos para dominar os currículos univer
 ☕️ <i>Acompanhe vagas e conteúdos para iniciantes em TI no Telegram da @CafeinaVagas</i>
 `;
 
+export const concursoTemplate = `<b>Template para concurso</b>
+
+💻 #concurso
+🧒🏽 Nível (#superior #medio)
+🌎 Local
+💰 Salário:
+🗓 Inscrições até:
+💸 Taxa de Inscrição:
+📋 Data da prova:
+
+
+Descrição do cargo
+
+🔗 https://www.exemplo.com
+
+☕️ <i>Acompanhe vagas e conteúdos para iniciantes em TI no Telegram da @CafeinaVagas</i>
+`;
+
 export const diversidadeTemplate = `<b>Tags de diversidade</b>
 <code>♀️ #ParaMulheres</code>
 ♀️ #ParaMulheres
