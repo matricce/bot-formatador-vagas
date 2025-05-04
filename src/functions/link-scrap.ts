@@ -63,7 +63,7 @@ export const format = async (ctx: Context, withIA = false) => {
     }
     const answer = formatJob({
       ...putHashtagsResponse,
-      jobUrl: `\n🔗 ${escapeMarkdown(job.url)})`,
+      jobUrl: `\n🔗 ${escapeMarkdown(job.url)}`,
       jobTitle: `\n💻 *${escapeMarkdown(job.title)}*`,
       jobDescription: `\n${job.confidence ? job.descriptionByAI : job.description}`,
     });
