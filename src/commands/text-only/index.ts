@@ -3,6 +3,7 @@ import {
   artigoTemplate,
   comandos,
   comoFormatar,
+  concursoTemplate,
   cursoTemplate,
   dicaTemplate,
   diversidadeTemplate,
@@ -48,6 +49,10 @@ export const dica = async (ctx: Context): Promise<void> => {
 
 export const diversidade = async (ctx: Context): Promise<void> => {
   await ctx.reply(diversidadeTemplate, { parse_mode: 'HTML' });
+};
+
+export const concurso = async (ctx: Context): Promise<void> => {
+  await ctx.reply(concursoTemplate, { parse_mode: 'HTML' });
 };
 
 export const formatar = async (ctx: Context): Promise<void> => {
